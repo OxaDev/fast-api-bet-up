@@ -11,7 +11,7 @@ Starter FastAPI + PostgreSQL + Alembic
 
 ## Installation
 
-### Avec uv et pyproject.toml
+### Avec uv
 
 ```sh
 python -m venv venv
@@ -42,16 +42,29 @@ REDIS_MAIN_PASSWORD=redis
 APP_ENV=development
 ```
 
-### Initialisation de la base
+## Stack Docker
 
-1. Créez la base PostgreSQL si besoin.
-2. Appliquez les migrations Alembic :
+Lancez la stack avec :
+
+```sh
+docker compose up --force-recreate --build -d db redis worker
+```
+
+## Appliquez les migrations Alembic
 
 ```sh
 alembic upgrade head
 ```
 
 ## Lancer l'API en local
+
+### Avec Docker
+
+```sh
+docker compose up --force-recreate --build -d api
+```
+
+### Sur sa machine
 
 ```sh
 uvicorn core.main:app --reload
@@ -68,14 +81,6 @@ La documentation interactive est disponible sur [http://localhost:8000/docs](htt
   ```sh
   pre-commit install
   ```
-
-## Docker
-
-Lancez la stack avec :
-
-```sh
-docker compose up --build
-```
 
 ## Migrations
 

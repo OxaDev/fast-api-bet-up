@@ -1,5 +1,7 @@
 from celery import Celery
 
+import api  # noqa: F401
+import db  # noqa: F401
 from core import env
 from core.celery.tasks import task_root_list
 

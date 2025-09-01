@@ -1,1 +1,1 @@
-task_root_list = ["core"]
+task_root_list = ["core", "api.cryptos"]

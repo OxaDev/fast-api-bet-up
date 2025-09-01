@@ -51,7 +51,6 @@ services:
     command: ["celery", "-A", "core.celery.connectors:celery_main_app", "worker", "-Q", "default", "--loglevel=info"]
     depends_on:
       - redis
-      - api
 
 volumes:
   dbdata:
