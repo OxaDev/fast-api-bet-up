@@ -8,6 +8,11 @@ from alembic import context
 from core import env
 from db.config import Base
 
+# region Models import for migrations
+from db.models.cryptos import CryptoCurrency, CryptoPrice  # noqa
+
+# endregion
+
 config = context.config
 fileConfig(config.config_file_name)
 target_metadata = Base.metadata
