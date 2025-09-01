@@ -2,6 +2,7 @@ import pydantic
 from celery import shared_task
 from requests import request
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.logger import Logger
 from db.config import get_session
@@ -19,6 +20,8 @@ def scrape_crypto(crypto_code: str) -> None:
     Logger.info(f"Kraken API - starting scraping task for crypto '{crypto_code}'")
 
     with get_session() as session:
+        session: AsyncSession
+
         stmt = select(CryptoCurrency).where(CryptoCurrency.crypto_code == crypto_code)
         crypto_currency = session.scalar(stmt)
 
