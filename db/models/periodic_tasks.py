@@ -1,8 +1,7 @@
 import uuid
-from datetime import datetime, timedelta, timezone
+from datetime import timedelta
 
-from sqlalchemy import Column, DateTime, Integer, String
-from sqlalchemy.orm import Session
+from sqlalchemy import JSON, Column, DateTime, Integer, String
 
 from db.config import Base
 
@@ -12,6 +11,9 @@ class PeriodicTask(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     uuid = Column(String(36), default=uuid.uuid4(), nullable=False, unique=True)
+    task_name = Column(String(255), nullable=False)
+    task_params = Column(JSON, nullable=True)
+    task_queue = Column(String(255), nullable=False)
     interval = Column(Integer, nullable=False)
     last_run = Column(DateTime, default=None, nullable=True)
 
@@ -21,15 +23,3 @@ class PeriodicTask(Base):
     @property
     def next_run(self):
         return self.last_run + timedelta(seconds=self.interval)
-
-
-def update_last_run_date(session: Session, uuid: str) -> PeriodicTask:
-    task = session.query(PeriodicTask).filter(PeriodicTask.uuid == uuid).first()
-    if not task:
-        raise ValueError(f"Task with uuid {uuid} not found")
-
-    task.last_run = datetime.now(timezone.utc)
-    session.add(task)
-    session.commit()
-    session.refresh(task)
-    return task

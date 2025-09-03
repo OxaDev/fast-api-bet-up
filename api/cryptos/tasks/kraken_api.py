@@ -1,12 +1,19 @@
+from datetime import datetime, timezone
+
 import pydantic
 from celery import shared_task
 from requests import request
-from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
 
+from core import env
 from core.logger import Logger
-from db.config import get_session
-from db.models.cryptos import CryptoCurrency, CryptoPrice  # tes modèles
+from db.models.cryptos import CryptoCurrency, CryptoPrice
+from db.models.periodic_tasks import PeriodicTask
+
+# Create synchronous engine for Celery tasks
+sync_engine = create_engine(env.DATABASE_URL.replace("postgresql+asyncpg", "postgresql"))
+SessionLocal = sessionmaker(sync_engine)
 
 
 class KrakenAPIResponse(pydantic.BaseModel):
@@ -16,14 +23,11 @@ class KrakenAPIResponse(pydantic.BaseModel):
 
 
 @shared_task
-def scrape_crypto(crypto_code: str) -> None:
+def scrape_crypto(crypto_code: str, task_uuid: str | None = None) -> None:
     Logger.info(f"Kraken API - starting scraping task for crypto '{crypto_code}'")
 
-    with get_session() as session:
-        session: AsyncSession
-
-        stmt = select(CryptoCurrency).where(CryptoCurrency.crypto_code == crypto_code)
-        crypto_currency = session.scalar(stmt)
+    with SessionLocal() as session:
+        crypto_currency = session.query(CryptoCurrency).filter(CryptoCurrency.crypto_code == crypto_code).first()
 
         if not crypto_currency:
             Logger.error(f"Kraken API - invalid CryptoCurrency configuration for '{crypto_code}'")
@@ -66,6 +70,12 @@ def scrape_crypto(crypto_code: str) -> None:
 
         session.add(new_price)
         session.commit()
+
+        if task_uuid is not None:
+            task = session.query(PeriodicTask).filter(PeriodicTask.uuid == task_uuid).first()
+            if task:
+                task.last_run = datetime.now(timezone.utc)
+                session.commit()
 
         Logger.info(f"Kraken API - successfully scraped price for currency '{crypto_code}'")
     return 0

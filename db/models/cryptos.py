@@ -16,6 +16,9 @@ class CryptoCurrency(Base):
     label = Column(String(100), default="Undefined")
     crypto_code = Column(String(20), unique=True, nullable=False)
 
+    periodic_task_id = Column(Integer, ForeignKey("periodic_task.id"))
+    periodic_task = relationship("PeriodicTask", uselist=False)
+
     prices = relationship("CryptoPrice", back_populates="currency", cascade="all, delete-orphan")
 
     @hybrid_property

@@ -63,9 +63,11 @@ services:
     env_file: .env
     environment:
       REDIS_MAIN_ENDPOINT: redis
+      POSTGRES_ENDPOINT: db
     command: ["celery", "-A", "core.celery.connectors:celery_main_app", "worker", "-Q", "default", "--loglevel=info"]
     depends_on:
       - redis
+      - db
 
 volumes:
   dbdata:
