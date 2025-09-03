@@ -7,10 +7,10 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 from alembic import context
 from core import env
 from db.config import Base
-from db.models.celery import PeriodicTask  # noqa
 
 # region Models import for migrations
 from db.models.cryptos import CryptoCurrency, CryptoPrice  # noqa
+from db.models.periodic_tasks import PeriodicTask  # noqa
 
 # endregion
 
