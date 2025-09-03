@@ -1,2 +1,5 @@
+from api.routers import router as api_router
+
+
 def apply_router(app):
-    pass  # Implementation of router application logic
+    app.include_router(api_router)

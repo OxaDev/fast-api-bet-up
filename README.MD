@@ -47,7 +47,7 @@ APP_ENV=development
 Lancez la stack avec :
 
 ```sh
-docker compose up --force-recreate --build -d db redis worker
+docker compose up --force-recreate --build -d beat worker db redis 
 ```
 
 ## Appliquez les migrations Alembic

@@ -26,6 +26,11 @@ services:
       REDIS_PORT: ${REDIS_MAIN_PORT}
     ports:
       - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
   
   api:
     build:
@@ -42,6 +47,16 @@ services:
       - "8000:8000"
     restart: unless-stopped
     command: ["uvicorn", "core.main:app", "--host", "0.0.0.0", "--port", "8000"]
+
+  beat:
+    build: .
+    env_file: .env
+    environment:
+      REDIS_MAIN_ENDPOINT: redis
+    command: ["celery", "-A", "core.celery.connectors:celery_main_app", "beat", "--scheduler", "redbeat.RedBeatScheduler", "--loglevel", "debug"]
+    depends_on:
+      redis:
+        condition: service_healthy
 
   worker:
     build: .
